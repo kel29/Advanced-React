@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import { Mutation } from 'react-apollo'
 import gql from 'graphql-tag'
 import Form from './styles/Form'
-import formatMoney from '../lib/formatMoney'
 import Error from '../components/ErrorMessage'
 import Router from 'next/router';
 
@@ -43,6 +42,22 @@ class CreateItem extends Component {
     this.setState({ [name]: val})
   }
 
+  uploadFile = async (e) => {
+    const files = e.target.files
+    const data = new FormData()
+    data.append('file', files[0])
+    data.append('upload_preset', 'sickfits')
+
+    const res = await fetch('https://api.cloudinary.com/v1_1/kloven/image/upload', { method: 'POST', body: data})
+    const file = await res.json()
+    console.log(file)
+    this.setState({
+      image: file.secure_url,
+      largeImage: file.eager[0].secure_url
+    })
+
+  }
+
   render() {
     return (
       <Mutation mutation={CREATE_ITEM_MUTATION} variables={this.state}>
@@ -59,6 +74,18 @@ class CreateItem extends Component {
             }}>
               <Error error={error} />
               <fieldset disabled={loading} aria-busy={loading}>
+              <label htmlFor="file">
+                  Image
+                  <input
+                    id="file"
+                    name="file"
+                    onChange={this.uploadFile}
+                    placeholder="file"
+                    required
+                    type="file"
+                  />
+                </label>
+                {this.state.image && <img src={this.state.image} width="200" alt='Uploading image preview' />}
                 <label htmlFor="title">
                   Title
                   <input
@@ -94,7 +121,7 @@ class CreateItem extends Component {
                     value={this.state.description}
                   />
                 </label>
-                <button type="submit" >Submit</button>
+                <button type="submit" disabled={!this.state.image}>Submit</button>
               </fieldset>
             </Form>
           )
