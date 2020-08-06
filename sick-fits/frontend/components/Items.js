@@ -40,7 +40,7 @@ class Items extends Component {
         <Query query={ALL_ITEMS_QUERY} variables={{ skip: (page - 1) * perPage}}>
           {({ error, data, loading }) => {
             if (loading) return <p>Loading...</p>
-            if (error) return <p>Error: {error.message}</p>g
+            if (error) return <p>Error: {error.message}</p>
             return (
               <ItemsList>
                 {data.items.map(item => <Item item={item} key={item.id}/>)}
@@ -48,7 +48,7 @@ class Items extends Component {
             )
           }}
         </Query>
-        <Pagination page={this.props.page} />
+        <Pagination page={page} />
       </Center>
     );
   }
