@@ -5,34 +5,36 @@ import Title from './styles/Title'
 import ItemStyles from './styles/ItemStyles'
 import PriceTag from './styles/PriceTag'
 import formatMoney from '../lib/formatMoney'
+import DeleteItem from './DeleteItem'
 
 class Item extends Component {
   render() {
     const { item } = this.props;
+    const { image, title, id, price, description} = item
     return (
       <ItemStyles>
-        {item.image &&  <img src={item.image} alt={item.title} />}
+        {image &&  <img src={image} alt={title} />}
         <Title>
           <Link href={{
             pathname: '/item',
-            query: { id: item.id }
+            query: { id }
           }}>
-            <a>{item.title}</a>
+            <a>{title}</a>
           </Link>
         </Title>
         <PriceTag>
-          {formatMoney(item.price)}
+          {formatMoney(price)}
         </PriceTag>
-        <p>{item.description}</p>
+        <p>{description}</p>
         <div className="buttonList">
           <Link href={{
             pathname: 'update',
-            query: { id: item.id }
+            query: { id }
           }}>
             <a>Edit</a>
           </Link>
           <button>Add To Cart</button>
-          <button>Delete</button>
+          <DeleteItem id={id}>Delete Me</DeleteItem>
         </div>
       </ItemStyles>
     );
