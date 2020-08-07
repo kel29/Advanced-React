@@ -65,7 +65,7 @@ const Mutations = {
     context.response.clearCookie('token')
     return { message: 'sign out successful'}
   },
-  requestReset(parent, {email}, context, info) {
+  async requestReset(parent, {email}, context, info) {
     const user = await context.db.query.user({where: { email}})
     if (!user) {
       throw new Error(`No user found for that email`)
@@ -81,8 +81,8 @@ const Mutations = {
 
     return { message: 'reset sent'}
   },
-  async resetPassword(parent, { password: rawPassword, confirmPassword, resetToken, email }, context, info) {
-    if (password !== confirmPassword) {
+  async resetPassword(parent, { password: rawPassword, confirmPassword, resetToken }, context, info) {
+    if (rawPassword !== confirmPassword) {
       throw new Error('Passwords do not match')
     }
     const [user] = await context.db.query.users({
@@ -98,14 +98,14 @@ const Mutations = {
 
     const password = await bcrypt.hash(rawPassword, 10)
     const updatedUser = await context.db.mutation.updateUser({
-      where: {email},
+      where: {email: user.email},
       data: {
         password,
         resetToken: null,
         resetTokenExpiry: null,
       }
     }, info)
-    
+
     const token = jwt.sign({ userId: user.id }, process.env.APP_SECRET)
     context.response.cookie('token', token, {
       httpOnly: true,
