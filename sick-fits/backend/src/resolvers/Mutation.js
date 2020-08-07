@@ -81,7 +81,7 @@ const Mutations = {
 
     return { message: 'reset sent'}
   },
-  async resetPassword(parent, { password, confirmPassword, resetToken, email }, context, info) {
+  async resetPassword(parent, { password: rawPassword, confirmPassword, resetToken, email }, context, info) {
     if (password !== confirmPassword) {
       throw new Error('Passwords do not match')
     }
@@ -105,6 +105,7 @@ const Mutations = {
         resetTokenExpiry: null,
       }
     }, info)
+    
     const token = jwt.sign({ userId: user.id }, process.env.APP_SECRET)
     context.response.cookie('token', token, {
       httpOnly: true,
