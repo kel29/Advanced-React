@@ -7,9 +7,18 @@ const oneYear = 1000 * 20 * 60 * 24 * 365
 
 const Mutations = {
   async createItem(parent, args, context, info) {
-    // TODO, check if logged in
+    if (!context.request.userId) {
+      throw new Error('You must be logged in to do that!')
+    }
     const item = await context.db.mutation.createItem({
-      data: { ...args }
+      data: {
+        user: {
+          connect: {
+            id: context.request.userId
+          }
+        },
+        ...args
+      }
     }, info)
     return item
   },
