@@ -1,5 +1,7 @@
+import React from 'react'
 import { Query } from 'react-apollo'
 import gql from 'graphql-tag'
+import PropTypes from 'prop-types'
 import Error from './ErrorMessage'
 import Table from './styles/Table'
 import SickButton from './styles/SickButton'
@@ -41,7 +43,7 @@ const Permissions = (props) => (
                 <th>👇🏻</th>
               </tr>
             </thead>
-            <tbody>{data.users && data.users.map(user => <UserPermissions user={user} />)}</tbody>
+            <tbody>{data.users && data.users.map(user => <UserPermissions user={user} key={user.id}/>)}</tbody>
           </Table>
         </>
       )
@@ -50,22 +52,57 @@ const Permissions = (props) => (
 )
 
 
-const UserPermissions = (props) => {
-  const { user } = props
-  return (
-    <tr>
-      <td>{user.name}</td>
-      <td>{user.email}</td>
-      {possiblePermissions.map(permission => (
-        <td>
-          <label htmlFor={`${user.id}-permission-${permission}`} >
-            <input type='checkbox' />
-          </label>
-        </td>
-      ))}
-      <td><SickButton>Update</SickButton></td>
-    </tr>
-  );
+class UserPermissions extends React.Component {
+  static propTypes = {
+    user: PropTypes.shape({
+      name: PropTypes.string,
+      email: PropTypes.string,
+      id: PropTypes.string,
+      permissions: PropTypes.array,
+    }).isRequired,
+  }
+
+  state = {
+    permissions: this.props.user.permissions,
+  }
+
+  
+  handlePermissionChange = (e) => {
+    const { checked, value } = e.target
+    if (checked) {
+      this.setState(prevState => ({
+        permissions: [...prevState.permissions, value]
+      }))
+    } else {
+      this.setState(prevState => ({
+        permissions: prevState.permissions.filter(permission => permission !== value)
+      }))
+    }
+  }
+  
+  render() {
+    const { user } = this.props
+    const { permissions } = this.state
+    return (
+      <tr>
+        <td>{user.name}</td>
+        <td>{user.email}</td>
+        {possiblePermissions.map(permission => (
+          <td key={`${user.id}-permission-${permission}`}>
+            <label htmlFor={`${user.id}-permission-${permission}`} >
+              <input
+                type='checkbox'
+                checked={permissions.includes(permission)}
+                value={permission}
+                onChange={this.handlePermissionChange}
+              />
+            </label>
+          </td>
+        ))}
+        <td><SickButton>Update</SickButton></td>
+      </tr>
+    )
+  }
 };
 
 
