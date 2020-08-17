@@ -2,6 +2,7 @@ const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken');
 const { randomBytes } = require('crypto');
 const { promisify } = require('util')
+const { hasPermission } = require('../utils');
 
 const oneYear = 1000 * 20 * 60 * 24 * 365
 
@@ -121,7 +122,28 @@ const Mutations = {
       maxAge: oneYear
     })
     return updatedUser
-  }
+  },
+  async updatePermissions(parent, { permissions, userId }, context, info) {
+    if (!context.request.userId) {
+      throw new Error('You must be logged in to do that!')
+    }
+    const currentUser = await context.db.query.user({
+      where: {
+        id: context.request.userId,
+      }
+    }, info)
+    hasPermission(context.request.user, ['ADMIN', 'PERMISSIONUPDATE'])
+    return context.db.mutation.updateUser({
+      data: {
+        permissions: {
+          set: permissions
+        }
+      },
+      where: {
+        id: userId
+      },
+    }, info)
+  },
 };
 
 module.exports = Mutations;
