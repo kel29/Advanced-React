@@ -7,11 +7,12 @@ import PriceTag from './styles/PriceTag'
 import formatMoney from '../lib/formatMoney'
 import DeleteItem from './DeleteItem'
 import AddToCart from './AddToCart'
+import User from './User'
 
 class Item extends Component {
   render() {
     const { item } = this.props;
-    const { image, title, id, price, description} = item
+    const { image, title, id, price, description, user} = item
     return (
       <ItemStyles>
         {image &&  <img src={image} alt={title} />}
@@ -36,7 +37,12 @@ class Item extends Component {
           </Link>
           <AddToCart id={id}/>
           {/* TODO: only show this button if the item belongs to the user */}
-          <DeleteItem id={id}>Delete Me</DeleteItem>
+          <User>
+            {({data}) => {
+              const loggedInUserId = data.me.id
+              return loggedInUserId === user.id && <DeleteItem id={id}>Delete Me</DeleteItem>
+            }}
+          </User>
         </div>
       </ItemStyles>
     );
