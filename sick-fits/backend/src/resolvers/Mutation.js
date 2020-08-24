@@ -140,7 +140,7 @@ const Mutations = {
         id: context.request.userId,
       }
     }, info)
-    hasPermission(context.request.user, ['ADMIN', 'PERMISSIONUPDATE'])
+    hasPermission(currentUser, ['ADMIN', 'PERMISSIONUPDATE'])
     return context.db.mutation.updateUser({
       data: {
         permissions: {
@@ -152,6 +152,37 @@ const Mutations = {
       },
     }, info)
   },
+  async addToCart(parent, { id }, context, info) {
+    const { userId } = context.request
+    if (!userId) {
+      throw new Error('You must be logged in to do that!')
+    }
+    [existingCartItem] = await context.db.query.cartItems({
+      where: {
+        user: { id: userId },
+        item: { id },
+      }
+    })
+    if (existingCartItem) {
+      return context.db.mutation.updateCartItem({
+        where: {id: existingCartItem.id },
+        data: { quantity: existingCartItem.quantity + 1 }
+      }, info)
+    }
+    return context.db.mutation.createCartItem(
+      {
+        data: {
+          user: {
+            connect: { id: userId },
+          },
+          item: {
+            connect: { id },
+          },
+        },
+      },
+      info
+    );
+  }
 };
 
 module.exports = Mutations;
