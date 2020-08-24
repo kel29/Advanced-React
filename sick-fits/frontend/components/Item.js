@@ -36,10 +36,9 @@ class Item extends Component {
             <a>Edit</a>
           </Link>
           <AddToCart id={id}/>
-          {/* TODO: only show this button if the item belongs to the user */}
           <User>
-            {({data}) => {
-              const loggedInUserId = data.me.id
+            {({data: { me }}) => {
+              const loggedInUserId = me && me.id
               return loggedInUserId === user.id && <DeleteItem id={id}>Delete Me</DeleteItem>
             }}
           </User>
