@@ -13,6 +13,12 @@ function createClient({ headers }) {
         headers,
       });
     },
+    clientState: {
+      resolvers: {},
+      defaults: {
+        cartOpen: false
+      },
+    }
   });
 }
 
